@@ -5,6 +5,7 @@ import sys
 class Light:
     position = np.array([None] * 3)
     intensity = 0.0
+    
     def __init__(self, p, i):
         self.position = p
         self.intensity = i
@@ -14,6 +15,7 @@ class Material:
     albedo = np.array([None] * 4)
     diffuse_color = np.array([None] * 3)
     specular_exponent = 0.0
+    
     def __init__(self,r = 1, a = np.array([1, 0, 0, 0]), color = np.array([None] * 3), spec = 0.0):
         self.refractive_index = r
         self.albedo = a
@@ -55,8 +57,7 @@ def refract(I, N, refractive_index): # Snell's law
         n = -N
     eta = etai / etat                       #float
     k = 1 - eta * eta * (1 - cosi * cosi)   #float
-    answer = (np.array([0,0,0]), n) if k < 0 else (I * eta + n * (eta * cosi - sqrt(k)), n)
-    return answer
+    return (np.array([0,0,0]), n) if k < 0 else (I * eta + n * (eta * cosi - sqrt(k)), n)
     
 def scene_intersect(orig, dir, spheres):
     material = Material(color = np.array([0.2, 0.7, 0.8]))
@@ -91,10 +92,10 @@ def cast_ray(orig, dir, spheres, lights, depth=0):
     reflect_dir = ray/np.linalg.norm(ray)                           #VECTOR
     ray, N = refract(dir, N, material.refractive_index)
     refract_dir = ray/np.linalg.norm(ray) #VECTOR
-    reflect_orig = sum(point - N) * 1e-3 if sum(reflect_dir * N) < 0 else point + N * 1e-3  #VECTOR  offset the original point to avoid occlusion by the object itself
-    refract_orig = point - N * 1e-3 if sum(refract_dir * N) < 0 else point + N * 1e-3  #VECTOR
-    reflect_color = cast_ray(reflect_orig, reflect_dir, spheres, lights, depth + 1)         #VECTOR
-    refract_color = cast_ray(refract_orig, refract_dir, spheres, lights, depth + 1)         #VECTOR
+    reflect_orig  = sum(point - N) * 1e-3 if sum(reflect_dir * N) < 0 else point + N * 1e-3  #VECTOR  offset the original point to avoid occlusion by the object itself
+    refract_orig  = point - N * 1e-3 if sum(refract_dir * N) < 0 else point + N * 1e-3       #VECTOR
+    reflect_color = cast_ray(reflect_orig, reflect_dir, spheres, lights, depth + 1)          #VECTOR
+    refract_color = cast_ray(refract_orig, refract_dir, spheres, lights, depth + 1)          #VECTOR
 
     diffuse_light_intensity = 0
     specular_light_intensity = 0
